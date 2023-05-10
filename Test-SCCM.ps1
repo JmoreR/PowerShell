@@ -18,25 +18,31 @@ Function Get-LoggedOnUser {
     }
 }
 
-
-# [ScriptBlock]$GetLoggedOnUserDetails = {
-#     [PSObject[]]$LoggedOnUserSessions = Get-LoggedOnUser
-#     [String[]]$usersLoggedOn = $LoggedOnUserSessions | ForEach-Object { $_.NTAccount }
-
-#     If ($usersLoggedOn) {
-#         [PSObject]$CurrentLoggedOnUserSession = $LoggedOnUserSessions | Where-Object { $_.IsCurrentSession }
-#         [PSObject]$CurrentConsoleUserSession = $LoggedOnUserSessions | Where-Object { $_.IsConsoleSession }
-#         [PSObject]$RunAsActiveUser = $LoggedOnUserSessions | Where-Object { $_.IsActiveUserSession }
-#     }
-# }
-
-# . $GetLoggedOnUserDetails
-
 If (-not ([Management.Automation.PSTypeName]'PSADT.UiAutomation').Type) {
     [String[]]$ReferencedAssemblies = 'System.Drawing', 'System.Windows.Forms', 'System.DirectoryServices'
-    Add-Type -Path $file -ReferencedAssemblies $ReferencedAssemblies -IgnoreWarnings -ErrorAction 'Stop'  | Receive-Job -Wait -AutoRemoveJob
+    Add-Type -Path $file -ReferencedAssemblies $ReferencedAssemblies -IgnoreWarnings -ErrorAction 'Stop'   
 }
 
-Get-LoggedOnUser
+[PSObject]$user = Get-LoggedOnUser
+[String]$sID = $user.SID
 
-Clear-Variable -Name GetLoggedOnUserDetails
+[string]$reg = "HKEY_USERS\$sID\Software\Microsoft\Windows\CurrentVersion\Uninstall"
+
+[string]$buscar = "RobloxPlayerLauncher.exe"
+
+
+try{
+    $objeto = Get-Childitem -Recurse $reg | Get-Itemproperty | Where-Object { $_ -match $buscar } -ErrorAction Stop
+    $cadena = $objeto.UninstallString
+
+    $app = $cadena.Split(" ")[0]
+    $arg = $cadena.Split(" ")[1]
+
+    $p = Start-Process -FilePath $app -ArgumentList $arg
+    $p.WaitForExit()
+    return $p.ExitCode
+}
+catch{
+    $errMsg = $_.Exception.Message
+    Write-Error $errMsg
+}
