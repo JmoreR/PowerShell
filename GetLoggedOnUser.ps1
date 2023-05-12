@@ -991,11 +991,9 @@ If (-not ([Management.Automation.PSTypeName]'PSADT.UiAutomation').Type) {
     }
 }
 
-Env:\PUBLIC
-
 [ScriptBlock]$GetLoggedOnUserTempPath = {
     # When running in system context we can derive the native "C:\Users" base path from the Public environment variable
-    [String]$dirUserProfile = Split-path $Env:\PUBLIC -ErrorAction 'SilentlyContinue'
+    [String]$dirUserProfile = Split-path $Env:PUBLIC -ErrorAction 'SilentlyContinue'
     If ($null -ne $RunAsActiveUser.NTAccount) {
         [String]$userProfileName = $RunAsActiveUser.UserName
         If (Test-Path (Join-Path -Path $dirUserProfile -ChildPath $userProfileName -ErrorAction 'SilentlyContinue')) {
