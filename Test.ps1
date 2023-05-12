@@ -369,4 +369,4 @@ If (-not ([Management.Automation.PSTypeName]'PSADT.UiAutomation').Type) {
     Add-Type -Path "C:\Users\jmore\Documents\GitHub\PowerShell\AppDeployToolkitMain.cs" -ReferencedAssemblies $ReferencedAssemblies -IgnoreWarnings -ErrorAction 'Stop'
 }
 
-
+Get-LoggedOnUser
